@@ -1,0 +1,19 @@
+id,name,numlession,numcredit,limit,department
+214103,Tin học đại cương,6,3,100,CNTT
+214201,Nhập môn tin học,3,3,40,CNTT
+214241,Mạng máy tính cơ bản,3,3,50,CNTT
+214251,Hệ điều hành nâng cao,3,3,30,CNTT
+214252,Lập trình mạng,3,4,20,CNTT
+214271,Quản trị mạng,3,3,10,CNTT
+214274,Lập trình trên TB di động,3,3,20,CNTT
+214286,Chuyên đề Java,3,4,30,CNTT
+214321,Lập trình cơ bản,3,4,40,CNTT
+214343,Đồ họa máy tính,3,3,89,CNTT
+214361,Giao tiếp người máy,3,3,70,CNTT
+214379,ĐBLC và kiểm thử phần mềm,3,4,100,CNTT
+214383,Quản lý dự án phần mềm,3,3,200,CNTT
+214441,Cấu trúc dữ liệu,3,3,160,CNTT
+214461,Phân tích và thiết kế HTTT,3,4,50,CNTT
+214462,Lập trình web,3,4,50,CNTT
+214483,Thương mại điện tử,3,3,40,CNTT
+214488,Chuyên đề Oracle,3,4,60,CNTT
