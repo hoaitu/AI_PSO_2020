@@ -7,11 +7,9 @@ public class MapValueEnum {
 	public enum WeekDay {
 		MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
 	}
-
 	public enum Session {
 		CA1, CA2, CA3, CA4, CA5
 	};
-
 	public static Map<Integer, WeekDay> generateMapWeekDay() {
 		Map<Integer, WeekDay> result = new HashMap<Integer, WeekDay>();
 		result.put(2, WeekDay.MONDAY);
@@ -23,7 +21,6 @@ public class MapValueEnum {
 		result.put(7, WeekDay.SUNDAY);
 		return result;
 	}
-
 	public static Map<Integer, Session> generateMaSession() {
 		Map<Integer, Session> result = new HashMap<Integer, Session>();
 		result.put(1, Session.CA1);
@@ -33,7 +30,4 @@ public class MapValueEnum {
 		result.put(5, Session.CA5);
 		return result;
 	}
-	
-	
-
 }

@@ -51,14 +51,12 @@ public class PSOTimeTable {
 	}
 
 	private TimeTable generateTimeTable(List<Assigned> listClassTime, List<Room> rooms, List<Lecturer> lecturers) {
-	//	Assigned[][][] timeTable = new Assigned[7][rooms.size()][4];
+		// Assigned[][][] timeTable = new Assigned[7][rooms.size()][4];
 		TimeTable result = new TimeTable(listClassTime, lecturers, rooms);
 		Random random = new Random();
 		Assigned assigned = null;
-		System.out.println(listClassTime.size());
 		for (int i = 0; i < listClassTime.size(); i++) {
 			assigned = listClassTime.get(i);
-			System.out.println(assigned.getId());
 			boolean fit = false;
 			int dayWeek = -1;
 			int room = -1;
@@ -68,7 +66,6 @@ public class PSOTimeTable {
 				room = random.nextInt(sizeRoom);
 				session = random.nextInt(4);
 				fit = result.CheckErrorNewAssigned(assigned, dayWeek, room, session);
-				System.out.println(fit);
 			}
 			result.set(assigned, dayWeek, room, session);
 		}
@@ -115,7 +112,6 @@ public class PSOTimeTable {
 					listMap.put(scoreAss[min[0]][min[1]][min[2]], v);
 
 				}
-
 			}
 
 			ObjectIndexAssigned a = listMap.get(listMap.firstKey());
@@ -155,32 +151,37 @@ public class PSOTimeTable {
 			throws ClassNotFoundException, SQLException, IOException, CloneNotSupportedException {
 		TimeTable res = null;
 		initalizationPopulation();
-		this.best = GetFitestTimetable();
-		double Gbest = this.best.calculatorFitness();
+		best = GetFitestTimetable();
+		double GbestFitnness = best.getFitness();
 		TimeTable[] particlesBest = new TimeTable[quantityTimetable];
 		particlesBest = Arrays.copyOf(timeTables, quantityTimetable);
-		int i = 0;
+		int i = 1;
 		Random rand = new Random();
 		for (int j = 0; j < timeTables.length; j++) {
 			timeTables[j].setVelocity(rand.nextInt(10));
 		}
-		System.out.println(iteration);
-		TimeTable next = null;
 		while (i < iteration) {
+			System.out.println("iteration" + i);
 			for (int j = 0; j < timeTables.length; j++) {
 				TimeTable particle = timeTables[j];
-				TimeTable cloneTable = timeTables[j].clone();
-				
+				TimeTable cloneTable = null;
+				TimeTable next = null;
+
 				int pmi = calculateInfluence(particle, particlesBest[j]);
 				int si = calculateInfluence(particle, this.best);
-				int newVelocity = (int) (this.W * timeTables[j].getVelocity() + this.C1 * pmi + this.C2 * si);
-				System.out.println(newVelocity);
+				//int newVelocity = (int) (this.W * timeTables[j].getVelocity() + this.C1 * pmi + this.C2 * si);
+				int newVelocity = (int) (this.W * timeTables[j].getVelocity() + rand.nextInt(1));
+				System.out.println("new Velocity: " + newVelocity);
 				while (next == null || next.getFitness() > timeTables[j].getFitness()) {
 					cloneTable = particle.clone();
 					next = movingForward(cloneTable, newVelocity);
+	//				next.swapAssAccordingCriteriaAlgSA(criteria, indexSoure);
 					if (next.getFitness() < timeTables[j].getFitness()) {
 						timeTables[j] = next;
 						particlesBest[j] = next;
+					}
+					if (next.getFitness() < best.getFitness()) {
+						best = next;
 					}
 				}
 				timeTables[j].setVelocity(newVelocity);
@@ -206,39 +207,54 @@ public class PSOTimeTable {
 			}
 		}
 		return null;
-
 	}
-
 	private TimeTable movingForward(TimeTable cloneTable, int newVelocity) {
 		// TODO Auto-generated method stub
-	//	Assigned[][][] cloneAssigned = cloneTable.getTimeTable();
+		// Assigned[][][] cloneAssigned = cloneTable.getTimeTable();
 		Assigned[][][] bestAssigned = best.getTimeTable();
 		Random rand = new Random();
-		System.out.println(cloneTable.getFitness());
-		for (int i = 0; i < newVelocity; i++) {
+		int i =0;
+		while(i < newVelocity) {
 			int dayOfWeek = rand.nextInt(5) + 2;
 			int room = rand.nextInt(romList.size());
 			int k = rand.nextInt(4);
 			Assigned randomAssignInBest = bestAssigned[dayOfWeek][room][k];
-			int[] indexOfAssignInParticle = getIndexOfAssigned(randomAssignInBest, cloneTable);
-			int[] particleIndex = new int[] { dayOfWeek, room, k };
-			System.out.println(indexOfAssignInParticle);
-			System.out.println("parti" + particleIndex.toString());
-			cloneTable.swapTowAssigned(indexOfAssignInParticle, particleIndex);
-			if (cloneTable.checkErrorClazztify() == true || cloneTable.checkHardBinding() == true) {
+				while(randomAssignInBest == null) {
+					dayOfWeek = rand.nextInt(5) + 2;
+					room = rand.nextInt(romList.size());
+					k = rand.nextInt(4);
+					randomAssignInBest = bestAssigned[dayOfWeek][room][k];
+				}
+				int[] indexOfAssignInParticle = getIndexOfAssigned(randomAssignInBest, cloneTable);
+				int[] particleIndex = new int[] { dayOfWeek, room, k };
 				cloneTable.swapTowAssigned(indexOfAssignInParticle, particleIndex);
-				i--;
-			}
-
+				System.out.println("swapping");
+				if (cloneTable.checkErrorClazztify() || cloneTable.checkHardBinding()) {
+					System.out.println("error");
+					cloneTable.swapTowAssigned(indexOfAssignInParticle, particleIndex);
+					i--;
+				}
+				else {
+					System.out.println("swapped");
+					i++;
+				}
 		}
 		return cloneTable;
 	}
-
 	// de tinh khac biet giua 2 timetable, do anh huong len van toc
 	private int calculateInfluence(TimeTable particle, TimeTable goal) {
 		// TODO Auto-generated method stub
-		int influence = goal.getFitness() - particle.getFitness();
-		return influence;
+		int infuence = 0;
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < romList.size(); j++) {
+				for (int j2 = 0; j2 < 4; j2++) {
+					if(particle.getTimeTable()[i][j][j2] != goal.getTimeTable()[i][j][j2]) {
+						infuence++;
+					}
+				}
+			}
+		}
+		return infuence;
 	}
 
 	// lay ra time table co fitness tot nhat
@@ -246,21 +262,25 @@ public class PSOTimeTable {
 		// TODO Auto-generated method stub
 		TimeTable fittest = timeTables[0];
 		for (int i = 1; i < timeTables.length; i++) {
-			if (timeTables[i].getFitness() < fittest.getFitness())
+			if (timeTables[i].getFitness() < fittest.getFitness()) {
 				fittest = timeTables[i];
+				System.out.println("fittest " + i);
+			}
 		}
 		return fittest;
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException, CloneNotSupportedException {
-		PSOTimeTable algo = new PSOTimeTable(50, 10);
+	public static void main(String[] args)
+			throws ClassNotFoundException, SQLException, IOException, CloneNotSupportedException {
+		PSOTimeTable algo = new PSOTimeTable(15, 10);
 //		TimeTable ex = algo.generateTimeTable(algo.listAssigned, algo.romList, algo.listLecture);
 //		TimeTable ex = algo.localSearchTimeTable(algo.listAssigned, algo.romList, algo.listLecture);
-//		System.out.println(ex.calculatorFitness());
+//		System.out.println(ex.getFitness());
 
 		TimeTable ex = algo.PSOAlgorithm();
 
 		ExcelOut.ResultToExcel(ex);
+
 	}
 
 }

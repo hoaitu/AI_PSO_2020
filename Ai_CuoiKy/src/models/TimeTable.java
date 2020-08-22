@@ -598,7 +598,6 @@ public class TimeTable {
 			Assigned temp = this.timeTable[indexSoure[0]][indexSoure[1]][indexSoure[2]];
 			this.timeTable[indexSoure[0]][indexSoure[1]][indexSoure[2]] = this.timeTable[indexSoure[0]][index][indexSoure[2]];
 			this.timeTable[indexSoure[0]][index][indexSoure[2]] = temp;
-
 			break;
 		}
 		case SESSION: {
