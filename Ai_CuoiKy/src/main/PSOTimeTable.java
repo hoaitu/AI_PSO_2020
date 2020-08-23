@@ -29,7 +29,7 @@ public class PSOTimeTable {
 	private List<Room> romList;
 //	private List<Busy> listBusy;
 	private List<Lecturer> listLecture;
-	private double W, C1, C2;
+	private int W, C1, C2;
 	private int N, sizeRoom;
 	private TimeTable best;
 
@@ -46,8 +46,8 @@ public class PSOTimeTable {
 		this.sizeRoom = romList.size();
 		this.N = listAssigned.size();
 		this.W = 1;
-		this.C1 = 2.0;
-		this.C2 = 2.0;
+		this.C1 = 1;
+		this.C2 = 1;
 	}
 
 	private TimeTable generateTimeTable(List<Assigned> listClassTime, List<Room> rooms, List<Lecturer> lecturers) {
@@ -163,30 +163,35 @@ public class PSOTimeTable {
 		while (i < iteration) {
 			System.out.println("iteration" + i);
 			for (int j = 0; j < timeTables.length; j++) {
+				System.out.println("particle  "+ j);
 				TimeTable particle = timeTables[j];
 				TimeTable cloneTable = null;
 				TimeTable next = null;
 
-				int pmi = calculateInfluence(particle, particlesBest[j]);
-				int si = calculateInfluence(particle, this.best);
-				//int newVelocity = (int) (this.W * timeTables[j].getVelocity() + this.C1 * pmi + this.C2 * si);
-				int newVelocity = (int) (this.W * timeTables[j].getVelocity() + rand.nextInt(1));
+				List<int[]> pmi = calculateInfluence(particle, particlesBest[j]);
+				List<int[]> si = calculateInfluence(particle, this.best);
+				int newVelocity = (int) (this.W * timeTables[j].getVelocity() + this.C1 * pmi.size() + this.C2 * si.size());
+				//int newVelocity = (int) (this.W * timeTables[j].getVelocity() + rand.nextInt(1));
 				System.out.println("new Velocity: " + newVelocity);
-				while (next == null || next.getFitness() > timeTables[j].getFitness()) {
+//				 (next == null || next.getFitness() > timeTables[j].getFitness() + 5000) {
+					System.out.println("again??");
 					cloneTable = particle.clone();
 					next = movingForward(cloneTable, newVelocity);
+//				}
 	//				next.swapAssAccordingCriteriaAlgSA(criteria, indexSoure);
-					if (next.getFitness() < timeTables[j].getFitness()) {
+					if (next.getFitness() < particlesBest[j].getFitness()) {
+	//					timeTables[j] = next;
 						timeTables[j] = next;
 						particlesBest[j] = next;
 					}
 					if (next.getFitness() < best.getFitness()) {
 						best = next;
 					}
-				}
+				
+				
 				timeTables[j].setVelocity(newVelocity);
 			}
-			best = GetFitestTimetable();
+			//best = GetFitestTimetable();
 			i++;
 		}
 		res = best;
@@ -215,6 +220,8 @@ public class PSOTimeTable {
 		Random rand = new Random();
 		int i =0;
 		while(i < newVelocity) {
+			i++;
+			System.out.println("velo iter" + i);
 			int dayOfWeek = rand.nextInt(5) + 2;
 			int room = rand.nextInt(romList.size());
 			int k = rand.nextInt(4);
@@ -228,33 +235,30 @@ public class PSOTimeTable {
 				int[] indexOfAssignInParticle = getIndexOfAssigned(randomAssignInBest, cloneTable);
 				int[] particleIndex = new int[] { dayOfWeek, room, k };
 				cloneTable.swapTowAssigned(indexOfAssignInParticle, particleIndex);
-				System.out.println("swapping");
 				if (cloneTable.checkErrorClazztify() || cloneTable.checkHardBinding()) {
-					System.out.println("error");
 					cloneTable.swapTowAssigned(indexOfAssignInParticle, particleIndex);
 					i--;
-				}
-				else {
-					System.out.println("swapped");
-					i++;
 				}
 		}
 		return cloneTable;
 	}
 	// de tinh khac biet giua 2 timetable, do anh huong len van toc
-	private int calculateInfluence(TimeTable particle, TimeTable goal) {
+	private List<int[]> calculateInfluence(TimeTable particle, TimeTable goal) {
 		// TODO Auto-generated method stub
-		int infuence = 0;
+		//int infuence = 0;
+		List<int[]> list = new ArrayList<int[]>();
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < romList.size(); j++) {
 				for (int j2 = 0; j2 < 4; j2++) {
-					if(particle.getTimeTable()[i][j][j2] != goal.getTimeTable()[i][j][j2]) {
-						infuence++;
+					if(goal.getTimeTable()[i][j][j2] != null) {
+						if(particle.getTimeTable()[i][j][j2] != goal.getTimeTable()[i][j][j2]) {
+							list.add(new int[] {i, j, j2});
+						}
 					}
 				}
 			}
 		}
-		return infuence;
+		return list;
 	}
 
 	// lay ra time table co fitness tot nhat
