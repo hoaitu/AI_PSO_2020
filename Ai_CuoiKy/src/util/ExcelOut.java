@@ -171,7 +171,7 @@ public class ExcelOut {
 
 	public static void writeByExcel(TimeTable timeTable) throws FileNotFoundException, UnsupportedEncodingException {
 		Assigned[][][] assign = timeTable.getTimeTable();
-		PrintWriter writer = new PrintWriter("localsearch.csv", "UTF-8");
+		PrintWriter writer = new PrintWriter("result.csv", "UTF-8");
 		writer.print("ID");
 		writer.print(",");
 		writer.print("Giảng viên");
